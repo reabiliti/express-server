@@ -1,21 +1,18 @@
 import { Request, Response, Router } from 'express'
-import { check } from 'express-validator'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import config from 'config'
 
 import { User } from '../entity/User'
-import validateResultMiddleware from '../middlewares/validateResult.middleware'
+import validateRequest from '../middlewares/validateRequest'
+import signUpValidator from '../validators/signUpValidator'
+import signInValidator from '../validators/signInValidator'
 
 const auth = Router()
 
 auth.post(
   '/signup',
-  [
-    check('email', 'Incorrect email').isEmail(),
-    check('password', 'Incorrect password').isLength({ min: 6 }),
-  ],
-  validateResultMiddleware('Incorrect data for registration'),
+  validateRequest(signUpValidator),
   async (req: Request, res: Response) => {
     try {
       const { name, email, password } = req.body
@@ -38,12 +35,8 @@ auth.post(
 
 auth.post(
   '/signin',
-  [
-    check('email', 'Incorrect email').isEmail(),
-    check('password', 'Incorrect password').exists(),
-  ],
-  validateResultMiddleware('Incorrect data for login'),
-  async (req, res) => {
+  validateRequest(signInValidator),
+  async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body
       const user = await User.findOne({ email })
