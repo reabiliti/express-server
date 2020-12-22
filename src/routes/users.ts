@@ -1,10 +1,10 @@
 import { Request, Response, Router } from 'express'
 import { User } from '../entity/User'
 
-const usersRoutes = Router()
+const users = Router()
 
 // GET Users
-usersRoutes.get('/', async (req: Request, res: Response) => {
+users.get('/', async (req: Request, res: Response) => {
   try {
     const users = await User.find()
 
@@ -16,7 +16,7 @@ usersRoutes.get('/', async (req: Request, res: Response) => {
 })
 
 // UPDATE User
-usersRoutes.put('/:id', async (req: Request, res: Response) => {
+users.put('/:id', async (req: Request, res: Response) => {
   const { id } = req.params
   const { name, email, password } = req.body
 
@@ -37,7 +37,7 @@ usersRoutes.put('/:id', async (req: Request, res: Response) => {
 })
 
 // DELETE User
-usersRoutes.delete('/:id', async (req: Request, res: Response) => {
+users.delete('/:id', async (req: Request, res: Response) => {
   const { id } = req.params
 
   try {
@@ -53,7 +53,7 @@ usersRoutes.delete('/:id', async (req: Request, res: Response) => {
 })
 
 // FIND User
-usersRoutes.get('/:id', async (req: Request, res: Response) => {
+users.get('/:id', async (req: Request, res: Response) => {
   const { id } = req.params
 
   try {
@@ -66,4 +66,4 @@ usersRoutes.get('/:id', async (req: Request, res: Response) => {
   }
 })
 
-export default usersRoutes
+export default users

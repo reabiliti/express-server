@@ -7,9 +7,9 @@ import config from 'config'
 import { User } from '../entity/User'
 import validateResultMiddleware from '../middlewares/validateResult.middleware'
 
-const authRoutes = Router()
+const auth = Router()
 
-authRoutes.post(
+auth.post(
   '/signup',
   [
     check('email', 'Incorrect email').isEmail(),
@@ -36,7 +36,7 @@ authRoutes.post(
   }
 )
 
-authRoutes.post(
+auth.post(
   '/signin',
   [
     check('email', 'Incorrect email').isEmail(),
@@ -65,4 +65,4 @@ authRoutes.post(
   }
 )
 
-export default authRoutes
+export default auth
