@@ -6,9 +6,9 @@ const users = Router()
 // GET Users
 users.get('/', async (req: Request, res: Response) => {
   try {
-    const users = await User.find()
+    const userList = await User.find()
 
-    return res.json(users)
+    return res.json(userList)
   } catch (err) {
     console.log(err)
     return res.status(500).json(err)
@@ -23,9 +23,9 @@ users.put('/:id', async (req: Request, res: Response) => {
   try {
     const user = await User.findOneOrFail(id)
 
-    user.name = name || user.name
+    user.firstName = name || user.firstName
     user.email = email || user.email
-    user.password = password || user.password
+    user.passwordHash = password || user.passwordHash
 
     await user.save()
 

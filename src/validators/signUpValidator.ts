@@ -4,7 +4,8 @@ import ajv from '../utils/ajv'
 
 type SignUpData = {
   email: string
-  name: string
+  firstName: string
+  lastName: string
   password: string
 }
 
@@ -12,10 +13,11 @@ const schema: JSONSchemaType<SignUpData, true> = {
   type: 'object',
   properties: {
     email: { type: 'string', format: 'email', nullable: true },
-    name: { type: 'string', nullable: true },
+    firstName: { type: 'string', nullable: true },
+    lastName: { type: 'string', nullable: true },
     password: { type: 'string', nullable: true },
   },
-  required: ['email', 'name', 'password'],
+  required: ['email', 'firstName', 'lastName', 'password'],
   additionalProperties: false,
 }
 
