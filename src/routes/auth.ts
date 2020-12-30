@@ -5,7 +5,7 @@ import validateRequest from '../middlewares/validateRequest'
 import signUpValidator from '../validators/signUpValidator'
 import signInValidator from '../validators/signInValidator'
 import { buildBadRequestError } from '../utils/errors'
-import { asyncWrapper } from '../helpers/wrappers'
+import { asyncWrapper } from './helpers'
 import { PasswordHash } from '../security/passwordHash'
 import { JWT } from '../security/jwt'
 

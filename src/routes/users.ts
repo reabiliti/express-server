@@ -1,25 +1,31 @@
-import { NextFunction, Request, Response, Router } from 'express'
+import { NextFunction, Response, Router } from 'express'
 
 import { User } from '../entity/User'
 import { buildNotFoundError } from '../utils/errors'
-import { asyncWrapper } from '../helpers/wrappers'
+import { asyncWrapper } from './helpers'
+import authenticateJWT from '../middlewares/authenticateJwt'
+import { IUserRequest } from '../request/interfaces'
 
 const users = Router()
+
+users.use(authenticateJWT)
 
 // GET Users
 users.get(
   '/',
-  asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
-    const userList = await User.find()
+  asyncWrapper(
+    async (req: IUserRequest, res: Response, _next: NextFunction) => {
+      const userList = await User.find()
 
-    return res.json(userList)
-  })
+      return res.json(userList)
+    }
+  )
 )
 
 // UPDATE User
 users.put(
   '/:id',
-  asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
+  asyncWrapper(async (req: IUserRequest, res: Response, next: NextFunction) => {
     const { id } = req.params
     const { name, email, password } = req.body
 
@@ -39,7 +45,7 @@ users.put(
 // DELETE User
 users.delete(
   '/:id',
-  asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
+  asyncWrapper(async (req: IUserRequest, res: Response, next: NextFunction) => {
     const { id } = req.params
 
     const user = await User.findOne(id)
@@ -54,7 +60,7 @@ users.delete(
 // FIND User
 users.get(
   '/:id',
-  asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
+  asyncWrapper(async (req: IUserRequest, res: Response, next: NextFunction) => {
     const { id } = req.params
 
     const user = await User.findOne(id)

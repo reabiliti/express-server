@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { GeneralError } from '../utils/errors'
+import { RequestError } from '../utils/errors'
 
 type BodyError = {
   status: string
@@ -7,14 +7,14 @@ type BodyError = {
   errors: []
 }
 
-const bodyError = (err: GeneralError): BodyError => ({
+const bodyError = (err: RequestError): BodyError => ({
   status: 'error',
   message: err.message,
   errors: err.errors,
 })
 
 const handleErrors = (
-  err: GeneralError,
+  err: RequestError,
   _req: Request,
   res: Response,
   _next: NextFunction
