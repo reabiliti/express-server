@@ -5,8 +5,10 @@ import config from 'config'
 
 import routes from './routes'
 import handleErrors from './middlewares/handleErrors'
+import { getMorgan } from './utils/morgan'
 
 const app: Express = express()
+app.use(getMorgan())
 app.use(express.json())
 app.use(routes)
 app.use(handleErrors)
