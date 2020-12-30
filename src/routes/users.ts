@@ -1,28 +1,30 @@
 import { NextFunction, Request, Response, Router } from 'express'
 
 import { User } from '../entity/User'
-import { buildGeneralError, buildNotFoundError } from '../utils/errors'
+import { buildNotFoundError } from '../utils/errors'
+import { asyncWrapper } from '../helpers/wrappers'
 
 const users = Router()
 
 // GET Users
-users.get('/', async (req: Request, res: Response, next: NextFunction) => {
-  try {
+users.get(
+  '/',
+  asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
     const userList = await User.find()
 
     return res.json(userList)
-  } catch (err) {
-    next(buildGeneralError(err))
-  }
-})
+  })
+)
 
 // UPDATE User
-users.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
-  const { id } = req.params
-  const { name, email, password } = req.body
+users.put(
+  '/:id',
+  asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params
+    const { name, email, password } = req.body
 
-  try {
-    const user = await User.findOneOrFail(id)
+    const user = await User.findOne(id)
+    if (!user) return next(buildNotFoundError('User not found'))
 
     user.firstName = name || user.firstName
     user.email = email || user.email
@@ -31,41 +33,35 @@ users.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
     await user.save()
 
     return res.json(user)
-  } catch (err) {
-    next(buildGeneralError(err))
-  }
-})
+  })
+)
 
 // DELETE User
 users.delete(
   '/:id',
-  async (req: Request, res: Response, next: NextFunction) => {
+  asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params
 
-    try {
-      const user = await User.findOneOrFail(id)
+    const user = await User.findOne(id)
+    if (!user) return next(buildNotFoundError('User not found'))
 
-      await user.remove()
+    await user.remove()
 
-      return res.status(204)
-    } catch (err) {
-      next(buildGeneralError(err))
-    }
-  }
+    return res.status(204).json()
+  })
 )
 
 // FIND User
-users.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
-  const { id } = req.params
+users.get(
+  '/:id',
+  asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params
 
-  try {
     const user = await User.findOne(id)
     if (!user) return next(buildNotFoundError('User not found'))
 
     return res.json(user)
-  } catch (err) {
-    next(buildGeneralError(err))
-  }
-})
+  })
+)
 
 export default users
