@@ -4,10 +4,10 @@ import { User } from '../entity/User'
 import validateRequest from '../middlewares/validateRequest'
 import signUpValidator from '../validators/signUpValidator'
 import signInValidator from '../validators/signInValidator'
-import { comparePasswords, generatePasswordHash } from '../helpers/passwords'
 import { buildBadRequestError } from '../utils/errors'
 import { asyncWrapper } from '../helpers/wrappers'
-import { generateAuthToken } from '../helpers/auth'
+import { PasswordHash } from '../security/passwordHash'
+import { JWT } from '../security/jwt'
 
 const auth = Router()
 
@@ -20,7 +20,7 @@ auth.post(
     const candidate = await User.findOne({ email })
     if (candidate) return next(buildBadRequestError('User has already existed'))
 
-    const passwordHash = await generatePasswordHash(password)
+    const passwordHash = await PasswordHash.hashPassword(password)
     const user = User.create({
       firstName,
       lastName,
@@ -45,10 +45,13 @@ auth.post(
     )
     if (!user) return next(invalidLoginError)
 
-    const isMatch = await comparePasswords(password, user.passwordHash)
+    const isMatch = await PasswordHash.comparePasswords(
+      password,
+      user.passwordHash
+    )
     if (!isMatch) return next(invalidLoginError)
 
-    const token: string = generateAuthToken(user.id)
+    const token: string = await JWT.generateToken(user.id)
 
     res.json({ token, userId: user.id })
   })
