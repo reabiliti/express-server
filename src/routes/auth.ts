@@ -1,4 +1,4 @@
-import { Request, Response, Router } from 'express'
+import { NextFunction, Request, Response, Router } from 'express'
 import jwt from 'jsonwebtoken'
 import config from 'config'
 
@@ -7,19 +7,20 @@ import validateRequest from '../middlewares/validateRequest'
 import signUpValidator from '../validators/signUpValidator'
 import signInValidator from '../validators/signInValidator'
 import { comparePasswords, generatePasswordHash } from '../helpers/passwords'
+import { buildBadRequestError, buildGeneralError } from '../utils/errors'
 
 const auth = Router()
 
 auth.post(
   '/signup',
   validateRequest(signUpValidator),
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response, next: NewableFunction) => {
     try {
       const { firstName, lastName, email, password } = req.body
 
       const candidate = await User.findOne({ email })
       if (candidate)
-        return res.status(400).json({ message: 'User has already existed' })
+        return next(buildBadRequestError('User has already existed'))
 
       const passwordHash = await generatePasswordHash(password)
       const user = User.create({
@@ -32,8 +33,7 @@ auth.post(
 
       return res.status(201).json(user)
     } catch (err) {
-      console.log(err)
-      return res.status(500).json(err)
+      next(buildGeneralError(err))
     }
   }
 )
@@ -41,16 +41,18 @@ auth.post(
 auth.post(
   '/signin',
   validateRequest(signInValidator),
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, password } = req.body
       const user = await User.findOne({ email })
 
-      const invalidLoginMessage = { message: 'Invalid pair Email/Password' }
-      if (!user) return res.status(400).json(invalidLoginMessage)
+      const invalidLoginError = buildBadRequestError(
+        'Invalid pair Email/Password'
+      )
+      if (!user) return next(invalidLoginError)
 
       const isMatch = await comparePasswords(password, user.passwordHash)
-      if (!isMatch) return res.status(400).json(invalidLoginMessage)
+      if (!isMatch) return next(invalidLoginError)
 
       const token = jwt.sign({ userId: user.id }, config.get('jwt.secret'), {
         expiresIn: config.get('jwt.expiresIn'),
@@ -58,7 +60,7 @@ auth.post(
 
       res.json({ token, userId: user.id })
     } catch (err) {
-      res.status(500).json(err)
+      next(buildGeneralError(err))
     }
   }
 )

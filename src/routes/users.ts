@@ -1,22 +1,23 @@
-import { Request, Response, Router } from 'express'
+import { NextFunction, Request, Response, Router } from 'express'
+
 import { User } from '../entity/User'
+import { buildGeneralError, buildNotFoundError } from '../utils/errors'
 
 const users = Router()
 
 // GET Users
-users.get('/', async (req: Request, res: Response) => {
+users.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userList = await User.find()
 
     return res.json(userList)
   } catch (err) {
-    console.log(err)
-    return res.status(500).json(err)
+    next(buildGeneralError(err))
   }
 })
 
 // UPDATE User
-users.put('/:id', async (req: Request, res: Response) => {
+users.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params
   const { name, email, password } = req.body
 
@@ -31,38 +32,39 @@ users.put('/:id', async (req: Request, res: Response) => {
 
     return res.json(user)
   } catch (err) {
-    console.log(err)
-    return res.status(500).json(err)
+    next(buildGeneralError(err))
   }
 })
 
 // DELETE User
-users.delete('/:id', async (req: Request, res: Response) => {
-  const { id } = req.params
+users.delete(
+  '/:id',
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params
 
-  try {
-    const user = await User.findOneOrFail(id)
+    try {
+      const user = await User.findOneOrFail(id)
 
-    await user.remove()
+      await user.remove()
 
-    return res.status(204)
-  } catch (err) {
-    console.log(err)
-    return res.status(500).json(err)
+      return res.status(204)
+    } catch (err) {
+      next(buildGeneralError(err))
+    }
   }
-})
+)
 
 // FIND User
-users.get('/:id', async (req: Request, res: Response) => {
+users.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params
 
   try {
-    const user = await User.findOneOrFail(id)
+    const user = await User.findOne(id)
+    if (!user) return next(buildNotFoundError('User not found'))
 
     return res.json(user)
   } catch (err) {
-    console.log(err)
-    return res.status(404).json(err)
+    next(buildGeneralError(err))
   }
 })
 
