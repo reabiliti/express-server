@@ -4,3 +4,4 @@ node_modules
 
 /config/default.json
 /yarn-error.log
+/logs/
